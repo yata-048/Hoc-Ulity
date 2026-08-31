@@ -1,8 +1,8 @@
 # Class C# thuần vs. Class MonoBehaviour
 
-## Class C# thuần: Là class lập trình tiêu chuẩn của C#, không kế thừa từ Unity. Dùng để chứa cấu trúc dữ liệu, thuật toán nội bộ; phải khởi tạo thủ công bằng từ khóa new và không thể gắn trực tiếp vào GameObject trong Scene.
+- **Class C# thuần**: Là class lập trình tiêu chuẩn của C#, không kế thừa từ Unity. Dùng để chứa cấu trúc dữ liệu, thuật toán nội bộ; phải khởi tạo thủ công bằng từ khóa new và không thể gắn trực tiếp vào GameObject trong Scene
 
-## MonoBehaviour: Là class cơ sở (base class) của Unity. Mọi script muốn gắn lên GameObject làm Component, muốn hiển thị trên Inspector và chạy theo vòng đời của game engine đều phải kế thừa từ class này. Tuyệt đối không khởi tạo bằng new.
+- **MonoBehaviour**: Là class cơ sở (base class) của Unity. Mọi script muốn gắn lên GameObject làm Component, muốn hiển thị trên Inspector và chạy theo vòng đời của game engine đều phải kế thừa từ class này. Tuyệt đối không khởi tạo bằng new.
 
 # Vòng đời GameObject (Execution Order)
 
