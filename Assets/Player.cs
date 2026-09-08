@@ -16,12 +16,19 @@ public class Player : MonoBehaviour
     [SerializeField] float fallingForce;
     [SerializeField] float defaultForce;
     [SerializeField] float wallJumpTime;
+    [SerializeField] float dashSpeed;
+    [SerializeField] float dashCooldown;
+    [SerializeField] float dashTime;
     float wallJumpTimer;
+    float dashCooldownTimer;
+    float dashTimer;
     float wallDirection;
     float movement;
+    float movementDirection = 1f;
     InputAction MoveAction; 
     InputAction JumpAction;
     InputAction AttackAction;
+    InputAction DashAction;
     bool isJump;
     bool isWall;
     int CoinCount=0;
@@ -30,19 +37,32 @@ public class Player : MonoBehaviour
         MoveAction=InputSystem.actions.FindAction("Move");
         JumpAction=InputSystem.actions.FindAction("Jump");
         AttackAction=InputSystem.actions.FindAction("Attack");
-
+        DashAction=InputSystem.actions.FindAction("Dash");
     }
     void Update()
     {
         GroundCheck();
         WallCheck();
         wallJumpTimer-=Time.deltaTime;
+        dashCooldownTimer-=Time.deltaTime;
+        dashTimer-=Time.deltaTime;
         movement=MoveAction.ReadValue<float>();
-        if(wallJumpTimer<0)
+        if(movement !=0)
+        {
+            movementDirection=movement;
+        }
+        if(wallJumpTimer<=0 && dashTimer<=0)
         {
             rb.linearVelocity=new Vector2(movement*speed,rb.linearVelocityY);
         }
-        
+        if(DashAction.WasPressedThisFrame() && dashCooldownTimer <= 0)
+        {
+            rb.linearVelocity=new Vector2(movementDirection*dashSpeed,rb.linearVelocityY);
+            rb.gravityScale = 0f;
+            dashTimer=dashTime;
+            dashCooldownTimer = dashCooldown;
+            Debug.Log("DASH");
+        }
         // if(isWall && isJump)
         // {
         //     rb.linearVelocity = new Vector2(0,Mathf.Min(rb.linearVelocityY, -1f));
@@ -59,6 +79,10 @@ public class Player : MonoBehaviour
                 wallJumpTimer=wallJumpTime;
             }
         }
+        if (dashTimer <= 0)
+        {
+            rb.gravityScale = defaultForce;
+        }      
         if (rb.linearVelocityY < 0)
         {
             rb.gravityScale=fallingForce;
@@ -71,7 +95,6 @@ public class Player : MonoBehaviour
         {
             Debug.Log("ATTACK!!!!");
         }
-        
     }
     void GroundCheck()
     {
