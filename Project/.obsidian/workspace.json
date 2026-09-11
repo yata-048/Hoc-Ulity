@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "baimoi buoi 4.md",
-                "mode": "preview",
+                "file": "baimoi buoi 5.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "baimoi buoi 4"
+              "title": "baimoi buoi 5"
             }
           }
         ]
@@ -190,8 +190,11 @@
   },
   "active": "f169a92235621008",
   "lastOpenFiles": [
-    "baicu buoi  3.md",
+    "baimoi buoi 5.md",
+    "baimoi buoi 5.md",
+    "baicu buoi 4.md",
     "baimoi buoi 4.md",
+    "baicu buoi  3.md",
     "baimoi buoi 3.md",
     "Untitled",
     "baicu buoi 2.md",

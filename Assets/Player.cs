@@ -3,6 +3,10 @@ using NUnit.Framework;
 using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Events;
+using UnityEngine.Rendering;
+using JetBrains.Annotations;
+using System.Collections;
 
 public class Player : MonoBehaviour
 {
@@ -19,25 +23,44 @@ public class Player : MonoBehaviour
     [SerializeField] float dashSpeed;
     [SerializeField] float dashCooldown;
     [SerializeField] float dashTime;
+    [SerializeField] public GameObject triangle;
+    [SerializeField] UnityEvent shootEvent;
+    [SerializeField] int maxAmmo;
+    [SerializeField] float KnockbackForceX;
+    [SerializeField] float KnockbackForceY;
+    [SerializeField] float knockbackTime;
+    [SerializeField] float shootInterval;
+    [SerializeField] GameObject bulletPrefab;
+    [SerializeField] float bulletSpeed;
+    [SerializeField] float reloadTime;
+    bool isReloading;
+    float knockbackTimer;
     float wallJumpTimer;
     float dashCooldownTimer;
+    float shootIntervalTimer;
     float dashTimer;
     float wallDirection;
     float movement;
     float movementDirection = 1f;
+
     InputAction MoveAction; 
     InputAction JumpAction;
     InputAction AttackAction;
     InputAction DashAction;
+    InputAction ReloadAction;
     bool isJump;
     bool isWall;
     int CoinCount=0;
+    int AmmoAmount;
+
     void Awake()
     {
         MoveAction=InputSystem.actions.FindAction("Move");
         JumpAction=InputSystem.actions.FindAction("Jump");
         AttackAction=InputSystem.actions.FindAction("Attack");
         DashAction=InputSystem.actions.FindAction("Dash");
+        ReloadAction=InputSystem.actions.FindAction("Reload");
+        AmmoAmount=maxAmmo;
     }
     void Update()
     {
@@ -46,12 +69,14 @@ public class Player : MonoBehaviour
         wallJumpTimer-=Time.deltaTime;
         dashCooldownTimer-=Time.deltaTime;
         dashTimer-=Time.deltaTime;
+        knockbackTimer-=Time.deltaTime;
+        shootIntervalTimer-=Time.deltaTime;
         movement=MoveAction.ReadValue<float>();
         if(movement !=0)
         {
             movementDirection=movement;
         }
-        if(wallJumpTimer<=0 && dashTimer<=0)
+        if(wallJumpTimer<=0 && dashTimer<=0  && knockbackTimer <= 0)
         {
             rb.linearVelocity=new Vector2(movement*speed,rb.linearVelocityY);
         }
@@ -63,10 +88,6 @@ public class Player : MonoBehaviour
             dashCooldownTimer = dashCooldown;
             Debug.Log("DASH");
         }
-        // if(isWall && isJump)
-        // {
-        //     rb.linearVelocity = new Vector2(0,Mathf.Min(rb.linearVelocityY, -1f));
-        // }
         if(JumpAction.WasPressedThisFrame())
         {
             if(!isJump)
@@ -91,9 +112,16 @@ public class Player : MonoBehaviour
         {
             rb.gravityScale=defaultForce;
         }
-        if(AttackAction.WasPressedThisFrame())
+        if(AttackAction.WasPressedThisFrame() && AmmoAmount>0 && shootIntervalTimer<0)
         {
-            Debug.Log("ATTACK!!!!");
+            shootEvent.Invoke();
+            shootIntervalTimer=shootInterval;
+        }
+        rb.linearVelocityY = Mathf.Clamp(rb.linearVelocityY,-20,50);
+
+        if(ReloadAction.WasPressedThisFrame() && AmmoAmount<maxAmmo && !isReloading)
+        {
+            StartCoroutine(Reloading());
         }
     }
     void GroundCheck()
@@ -144,5 +172,36 @@ public class Player : MonoBehaviour
         {
             isWall = false;
         }
+    }
+    public void ReduceAmmo()
+    {
+        AmmoAmount--;
+        Debug.Log("Ammo:" + AmmoAmount);
+    }
+    public void DoKnockBack()
+    {
+        rb.linearVelocity = new Vector2(KnockbackForceX*-movementDirection,KnockbackForceY);
+        knockbackTimer = knockbackTime;
+    }
+
+    public void Shoot()
+    {
+        GameObject bullet =Instantiate(bulletPrefab,transform.position,Quaternion.identity);
+        Rigidbody2D rbBullet=bullet.GetComponent<Rigidbody2D>();
+        rbBullet.linearVelocity = new Vector2(movementDirection*bulletSpeed,0);
+    }
+
+    IEnumerator Reloading()
+    {
+        isReloading=true;
+        Debug.Log("Reloading.");
+        yield return new WaitForSeconds(reloadTime/3);
+        Debug.Log("Reloading..");
+        yield return new WaitForSeconds(reloadTime/3);
+        Debug.Log("Reloading...");
+        yield return new WaitForSeconds(reloadTime/3);
+        AmmoAmount=maxAmmo;
+        isReloading=false;
+        Debug.Log("Reloaded");
     }
 }
